@@ -1,6 +1,7 @@
 import React from 'react';
 import p1 from './../p1.jpg';
 import axios from 'axios';
+import ReactLoading from 'react-loading';
 
 export default class NasaPicture extends React.Component {
   constructor(props) {
@@ -8,13 +9,15 @@ export default class NasaPicture extends React.Component {
     this.state = {
       lon: '',
       lat: '',
-      earthPic: p1
+      earthPic: p1,
+      loading: false
     };
   }
 
   submitHandler = (event) => {
     event.preventDefault();
     const { lon, lat } = this.state;
+    this.setState({ loading: true })
     this.getData(lon, lat);
     this.setState({ lon: '', lat: '' });
   };
@@ -28,13 +31,15 @@ export default class NasaPicture extends React.Component {
       )
       .then((response) => {
         this.setState({
-          earthPic: response.config.url
+          earthPic: response.config.url,
+          loading: false
         });
       })
       .catch((error) => {
         console.log(error, 'failed to fetch data');
         this.setState({
           earthPic: p1,
+          loading: false
         });
       });
   }
@@ -48,6 +53,17 @@ export default class NasaPicture extends React.Component {
   };
 
   render() {
+    const { loading, earthPic } = this.state
+    const content = () => {
+      switch(true) {
+        case loading:
+          return <ReactLoading type='balls' color='#CBBEB5'/>
+        case earthPic.length >0:
+          return <img src={earthPic} className="img-thumbnail" alt="p1" />
+        default:
+          return <img src={p1} className="img-thumbnail" alt="p1" />
+      }
+    }
     return (
       <div>
         <form onSubmit={this.submitHandler}>
@@ -78,7 +94,7 @@ export default class NasaPicture extends React.Component {
           </button>
         </form>
         <br />
-        <img src={this.state.earthPic} className="img-thumbnail" alt="p1" />
+        {content()}
       </div>
     );
   }
